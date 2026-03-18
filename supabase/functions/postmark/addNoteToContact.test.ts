@@ -26,7 +26,7 @@ describe("addNoteToContact", () => {
       const existingCompany = { id: 1, name: "acme.com", sales_id: 42 };
       mockFrom.mockReturnValue({
         select: () => ({
-          eq: () => ({
+          ilike: () => ({
             maybeSingle: () =>
               Promise.resolve({ data: existingCompany, error: null }),
           }),
@@ -42,7 +42,7 @@ describe("addNoteToContact", () => {
     it("throws when fetching the company fails", async () => {
       mockFrom.mockReturnValue({
         select: () => ({
-          eq: () => ({
+          ilike: () => ({
             maybeSingle: () =>
               Promise.resolve({ data: null, error: { message: "DB error" } }),
           }),
@@ -59,7 +59,7 @@ describe("addNoteToContact", () => {
     it("returns null for a known mail provider domain without creating a company", async () => {
       mockFrom.mockReturnValue({
         select: () => ({
-          eq: () => ({
+          ilike: () => ({
             maybeSingle: () => Promise.resolve({ data: null, error: null }),
           }),
         }),
@@ -78,7 +78,7 @@ describe("addNoteToContact", () => {
         .mockReturnValueOnce({
           // first call: fetch
           select: () => ({
-            eq: () => ({
+            ilike: () => ({
               maybeSingle: () => Promise.resolve({ data: null, error: null }),
             }),
           }),
@@ -101,7 +101,7 @@ describe("addNoteToContact", () => {
       mockFrom
         .mockReturnValueOnce({
           select: () => ({
-            eq: () => ({
+            ilike: () => ({
               maybeSingle: () => Promise.resolve({ data: null, error: null }),
             }),
           }),
@@ -192,7 +192,7 @@ describe("addNoteToContact", () => {
         .mockReturnValueOnce({
           // 2nd call: fetch company → found
           select: () => ({
-            eq: () => ({
+            ilike: () => ({
               maybeSingle: () =>
                 Promise.resolve({ data: existingCompany, error: null }),
             }),
@@ -231,7 +231,7 @@ describe("addNoteToContact", () => {
         .mockReturnValueOnce({
           // 2nd call: fetch company (gmail.com) → not found (mail providers are never created)
           select: () => ({
-            eq: () => ({
+            ilike: () => ({
               maybeSingle: () => Promise.resolve({ data: null, error: null }),
             }),
           }),
@@ -267,7 +267,7 @@ describe("addNoteToContact", () => {
         })
         .mockReturnValueOnce({
           select: () => ({
-            eq: () => ({
+            ilike: () => ({
               maybeSingle: () =>
                 Promise.resolve({ data: existingCompany, error: null }),
             }),

@@ -1,6 +1,7 @@
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
 import type { Attachment } from "./extractAndUploadAttachments.ts";
 import { MAIL_PROVIDERS } from "./mailProvider.const.ts";
+import { compareIgnoringCase } from "./compareIgnoringCase.ts";
 
 export const getOrCreateCompanyFromDomain = async (
   domain: string,
@@ -11,7 +12,7 @@ export const getOrCreateCompanyFromDomain = async (
     await supabaseAdmin
       .from("companies")
       .select("*")
-      .eq("name", domain)
+      .ilike("name", escapeSqlWildcards(domain))
       .maybeSingle();
   if (fetchCompanyError) {
     throw new Error(
@@ -23,14 +24,16 @@ export const getOrCreateCompanyFromDomain = async (
     return existingCompany;
   }
 
-  if (MAIL_PROVIDERS.includes(domain)) {
+  if (
+    MAIL_PROVIDERS.some((provider) => compareIgnoringCase(provider, domain))
+  ) {
     // We don't want to create companies for generic mail providers, as they are not really companies and it would pollute the database with useless entries.
     return null;
   }
 
   const { data: newCompanies, error: createCompanyError } = await supabaseAdmin
     .from("companies")
-    .insert({ name: domain, sales_id: salesId })
+    .insert({ name: domain.toLowerCase(), sales_id: salesId })
     .select();
   if (createCompanyError) {
     throw new Error(
