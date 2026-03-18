@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { Notification } from "@/components/admin/notification";
 import { ThemeProvider } from "@/components/admin/theme-provider";
+import { ContactEdit } from "@/components/atomic-crm/contacts/ContactEdit";
 import { ContactList } from "@/components/atomic-crm/contacts/ContactList";
 import {
   ContactListContent,
@@ -30,7 +31,7 @@ import {
   type AuthProvider,
 } from "ra-core";
 import { useMemo, useState, type ReactNode } from "react";
-import { MemoryRouter } from "react-router";
+import { MemoryRouter, Route, Routes } from "react-router";
 
 const listSort = { field: "last_seen", order: "DESC" } as const;
 const listPerPage = 25;
@@ -62,6 +63,7 @@ const resourceDefinitions = {
   },
   contacts: {
     hasCreate: true,
+    hasEdit: true,
     hasList: true,
     hasShow: true,
     name: "contacts",
@@ -310,6 +312,17 @@ export const MobileContactListContentHarness = () => (
       <ContactListContentMobile />
     </InfiniteListBase>
   </div>
+);
+
+// EditBase reads the record id from the route params, so we mount a Route.
+// We use pessimistic mode to avoid the 5s undoable delay in tests.
+export const ContactEditHarness = () => (
+  <Routes>
+    <Route
+      path="/contacts/:id"
+      element={<ContactEdit mutationMode="pessimistic" />}
+    />
+  </Routes>
 );
 
 // Keep the sheet stateful so tests can assert that save flows close it.
