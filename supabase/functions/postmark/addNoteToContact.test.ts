@@ -141,7 +141,7 @@ describe("addNoteToContact", () => {
       };
       mockFrom.mockReturnValue({
         select: () => ({
-          contains: () => ({
+          ilike: () => ({
             maybeSingle: () =>
               Promise.resolve({ data: existingContact, error: null }),
           }),
@@ -151,13 +151,13 @@ describe("addNoteToContact", () => {
       const result = await getOrCreateContactFromEmailInfo(contactParams);
 
       expect(result).toEqual(existingContact);
-      expect(mockFrom).toHaveBeenCalledWith("contacts");
+      expect(mockFrom).toHaveBeenCalledWith("contacts_summary");
     });
 
     it("throws when fetching the contact fails", async () => {
       mockFrom.mockReturnValue({
         select: () => ({
-          contains: () => ({
+          ilike: () => ({
             maybeSingle: () =>
               Promise.resolve({ data: null, error: { message: "DB error" } }),
           }),
@@ -184,7 +184,7 @@ describe("addNoteToContact", () => {
         .mockReturnValueOnce({
           // 1st call: fetch contact → not found
           select: () => ({
-            contains: () => ({
+            ilike: () => ({
               maybeSingle: () => Promise.resolve({ data: null, error: null }),
             }),
           }),
@@ -223,7 +223,7 @@ describe("addNoteToContact", () => {
         .mockReturnValueOnce({
           // 1st call: fetch contact → not found
           select: () => ({
-            contains: () => ({
+            ilike: () => ({
               maybeSingle: () => Promise.resolve({ data: null, error: null }),
             }),
           }),
@@ -260,7 +260,7 @@ describe("addNoteToContact", () => {
       mockFrom
         .mockReturnValueOnce({
           select: () => ({
-            contains: () => ({
+            ilike: () => ({
               maybeSingle: () => Promise.resolve({ data: null, error: null }),
             }),
           }),
@@ -314,7 +314,7 @@ describe("addNoteToContact", () => {
         .mockReturnValueOnce({
           // 1st call: fetch sales → found
           select: () => ({
-            eq: () => ({
+            ilike: () => ({
               neq: () => ({
                 maybeSingle: () =>
                   Promise.resolve({ data: salesRecord, error: null }),
@@ -325,7 +325,7 @@ describe("addNoteToContact", () => {
         .mockReturnValueOnce({
           // 2nd call: fetch contact → found
           select: () => ({
-            contains: () => ({
+            ilike: () => ({
               maybeSingle: () =>
                 Promise.resolve({ data: existingContact, error: null }),
             }),
@@ -362,7 +362,7 @@ describe("addNoteToContact", () => {
         .mockReturnValueOnce({
           // 1st call: fetch sales → found
           select: () => ({
-            eq: () => ({
+            ilike: () => ({
               neq: () => ({
                 maybeSingle: () =>
                   Promise.resolve({ data: salesRecord, error: null }),
@@ -373,7 +373,7 @@ describe("addNoteToContact", () => {
         .mockReturnValueOnce({
           // 2nd call: fetch contact → found
           select: () => ({
-            contains: () => ({
+            ilike: () => ({
               maybeSingle: () =>
                 Promise.resolve({ data: existingContact, error: null }),
             }),
@@ -405,7 +405,7 @@ describe("addNoteToContact", () => {
         .mockReturnValueOnce({
           // 1st call: fetch sales → found
           select: () => ({
-            eq: () => ({
+            ilike: () => ({
               neq: () => ({
                 maybeSingle: () =>
                   Promise.resolve({ data: salesRecord, error: null }),
@@ -416,7 +416,7 @@ describe("addNoteToContact", () => {
         .mockReturnValueOnce({
           // 2nd call: fetch contact → DB error, causes getOrCreateContactFromEmailInfo to throw
           select: () => ({
-            contains: () => ({
+            ilike: () => ({
               maybeSingle: () =>
                 Promise.resolve({ data: null, error: { message: "DB error" } }),
             }),
