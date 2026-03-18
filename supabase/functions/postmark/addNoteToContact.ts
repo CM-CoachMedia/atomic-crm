@@ -56,9 +56,9 @@ export const getOrCreateContactFromEmailInfo = async ({
   // Check if the contact already exists
   const { data: existingContact, error: fetchContactError } =
     await supabaseAdmin
-      .from("contacts")
+      .from("contacts_summary")
       .select("*")
-      .contains("email_jsonb", JSON.stringify([{ email }]))
+      .ilike("email_fts", `%"${escapeSqlWildcards(email)}"%`)
       .maybeSingle();
   if (fetchContactError) {
     throw new Error(
@@ -78,7 +78,7 @@ export const getOrCreateContactFromEmailInfo = async ({
     .insert({
       first_name: firstName,
       last_name: lastName,
-      email_jsonb: [{ email, type: "Work" }],
+      email_jsonb: [{ email: email.toLowerCase(), type: "Work" }],
       company_id: company ? company.id : null,
       sales_id: salesId,
       first_seen: new Date(),
@@ -92,6 +92,10 @@ export const getOrCreateContactFromEmailInfo = async ({
     );
   }
   return newContacts[0];
+};
+
+const escapeSqlWildcards = (str: string | null | undefined) => {
+  return (str || "").replaceAll("_", "\\_").replaceAll("%", "\\%");
 };
 
 export const addNoteToContact = async ({
@@ -114,7 +118,7 @@ export const addNoteToContact = async ({
   const { data: sales, error: fetchSalesError } = await supabaseAdmin
     .from("sales")
     .select("*")
-    .eq("email", salesEmail)
+    .ilike("email", escapeSqlWildcards(salesEmail))
     .neq("disabled", true)
     .maybeSingle();
 

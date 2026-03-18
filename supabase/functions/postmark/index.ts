@@ -14,6 +14,7 @@ import { getExpectedAuthorization } from "./getExpectedAuthorization.ts";
 import { getNoteContent } from "./getNoteContent.ts";
 import { extractAndUploadAttachments } from "./extractAndUploadAttachments.ts";
 import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
+import { compareIgnoringCase } from "./compareIgnoringCase.ts";
 
 const webhookUser = Deno.env.get("POSTMARK_WEBHOOK_USER");
 const webhookPassword = Deno.env.get("POSTMARK_WEBHOOK_PASSWORD");
@@ -61,15 +62,20 @@ Deno.serve(async (req) => {
   if (
     INBOUND_EMAIL &&
     ToFull.length === 1 &&
-    ToFull[0].Email === INBOUND_EMAIL &&
-    salesEmails.includes(FromFull.Email)
+    compareIgnoringCase(ToFull[0].Email, INBOUND_EMAIL) &&
+    salesEmails.some((email: string) =>
+      compareIgnoringCase(email, FromFull.Email),
+    )
   ) {
     const emailRegex = /[\w.+%-]+@[\w.-]+\.[a-zA-Z]{2,}/g;
     const emailsInBody = TextBody.match(emailRegex) || [];
 
     const candidateEmails = emailsInBody.filter(
       (email: string) =>
-        email !== INBOUND_EMAIL && !salesEmails?.includes(email),
+        !compareIgnoringCase(email, INBOUND_EMAIL) &&
+        !salesEmails.some((salesEmail: string) =>
+          compareIgnoringCase(salesEmail, email),
+        ),
     );
     if (candidateEmails.length > 0) {
       ToFull = [
